@@ -80,9 +80,35 @@ const HeightMatchingGame: React.FC = () => {
     const character = gameState.characters.find(c => c._id === characterId);
     if (!character) return;
 
-    const isCorrect = character.height === height;
-    const newMatches = { ...gameState.matches, [characterId]: height };
-    const newScore = isCorrect ? gameState.score + 1 : gameState.score;
+    const newMatches = { ...gameState.matches };
+    const currentMatch = newMatches[characterId];
+
+    // If clicking the same height, deselect it
+    if (currentMatch === height) {
+      delete newMatches[characterId];
+    } else {
+      // Check if this height is already used by another character
+      const heightUsedBy = Object.keys(newMatches).find(
+        id => newMatches[id] === height && id !== characterId
+      );
+
+      // If height is used, remove it from the other character first
+      if (heightUsedBy) {
+        delete newMatches[heightUsedBy];
+      }
+
+      // Assign the height to this character
+      newMatches[characterId] = height;
+    }
+
+    // Recalculate score based on all current matches
+    let newScore = 0;
+    Object.keys(newMatches).forEach(id => {
+      const char = gameState.characters.find(c => c._id === id);
+      if (char && newMatches[id] === char.height) {
+        newScore++;
+      }
+    });
 
     const allMatched = Object.keys(newMatches).length === gameState.totalQuestions;
 
@@ -236,10 +262,6 @@ const HeightMatchingGame: React.FC = () => {
                           : ''
                       }`}
                       onClick={() => handleMatch(character._id, height)}
-                      disabled={
-                        gameState.matches[character._id] !== undefined &&
-                        gameState.matches[character._id] !== height
-                      }
                     >
                       {height}
                     </button>
