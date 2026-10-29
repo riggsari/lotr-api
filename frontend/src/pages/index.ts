@@ -5,6 +5,7 @@ import Account from "./Account";
 import SignUp from "./SignUp";
 import Login from "./Login";
 import NotFoundPage from "./NotFoundPage";
+import HeightMatchingGame from "./HeightMatchingGame";
 
 export const Pages: Record<string, React.FC> = {
   Home: Home,
@@ -13,5 +14,6 @@ export const Pages: Record<string, React.FC> = {
   Account: Account,
   SignUp: SignUp,
   Login: Login,
+  HeightMatchingGame: HeightMatchingGame,
   NotFoundPage: NotFoundPage,
 };
