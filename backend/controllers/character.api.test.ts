@@ -87,6 +87,27 @@ describe('character controller', () => {
 		expect(response.body.docs).toEqual(fakeCharacter);
 	});
 
+	it('should return Bilbo Baggins with correct height', async () => {
+		const bilboCharacter = {
+			_id: '5cd99d4bde30eff6ebccfc38',
+			height: '1.25m (4\'1")',
+			race: 'Hobbit',
+			gender: 'Male',
+			birth: '22 September ,TA 2890',
+			spouse: 'None',
+			death: 'Unknown (Last sighting 29 SeptemberTA 3021,) (,SR 1421,)',
+			realm: '',
+			hair: 'Brown, later white',
+			name: 'Bilbo Baggins',
+			wikiUrl: 'http://lotr.wikia.com//wiki/Bilbo_Baggins'
+		};
+		mockingoose(CharacterModel).toReturn(bilboCharacter);
+		const response = await request(app).get('/v2/character/5cd99d4bde30eff6ebccfc38');
+		expect(response.statusCode).toEqual(HttpCode.OK);
+		expect(response.body.docs.height).toEqual('1.25m (4\'1")');
+		expect(response.body.docs.name).toEqual('Bilbo Baggins');
+	});
+
 	it('/character/:id should handle error correctly when getting a single character', async () => {
 		mockingoose(CharacterModel).toReturn(new Error('error'));
 		const response = await request(app).get('/v2/character/5cd99d4bde30eff6ebccfea5');
