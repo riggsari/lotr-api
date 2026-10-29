@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOTR Character Height Quiz</title>
+    <style>
+        :root {
+            --gold: #d4af37;
+            --dark-gold: #b8941f;
+            --deep-brown: #2c1810;
+            --medium-brown: #4a2c1a;
+            --light-brown: #8b6f47;
+            --cream: #f5e6d3;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --success: #4caf50;
+            --error: #f44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, var(--deep-brown) 0%, var(--medium-brown) 100%);
+            color: var(--cream);
+            min-height: 100vh;
+            padding: 24px;
+            line-height: 1.6;
+        }
+
+        @media (prefers-color-scheme: light) {
+            body {
+                background: linear-gradient(135deg, var(--cream) 0%, #e8d4b8 100%);
+                color: var(--deep-brown);
+            }
+            .card {
+                background: white;
+                box-shadow: 0 8px 32px rgba(44, 24, 16, 0.15);
+            }
+            .option {
+                background: var(--cream);
+                border-color: var(--light-brown);
+                color: var(--deep-brown);
+            }
+            .option:hover {
+                background: #ede0cc;
+                border-color: var(--gold);
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: var(--gold);
+            text-shadow: 2px 2px 4px var(--shadow);
+            margin-bottom: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            opacity: 0.9;
+            font-style: italic;
+        }
+
+        .card {
+            background: rgba(74, 44, 26, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 8px 32px var(--shadow);
+            margin-bottom: 24px;
+            border: 2px solid var(--gold);
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .score-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .score-label {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .score-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .question-section {
+            margin-bottom: 32px;
+        }
+
+        .question-number {
+            font-size: 0.875rem;
+            color: var(--gold);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .question-text {
+            font-size: clamp(1.25rem, 3vw, 1.5rem);
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        .character-info {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            border-left: 4px solid var(--gold);
+        }
+
+        .character-name {
+            font-size: 1.25rem;
+            color: var(--gold);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .character-detail {
+            font-size: 0.9375rem;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .options {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option {
+            background: rgba(139, 111, 71, 0.3);
+            border: 2px solid var(--light-brown);
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 1.125rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .option:hover:not(.disabled) {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--gold);
+            transform: translateX(4px);
+        }
+
+        .option:focus {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        .option.selected {
+            background: rgba(212, 175, 55, 0.3);
+            border-color: var(--gold);
+            font-weight: 600;
+        }
+
+        .option.correct {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .option.incorrect {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .feedback {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 1rem;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid var(--success);
+        }
+
+        .feedback.incorrect {
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid var(--error);
+        }
+
+        .btn {
+            background: var(--gold);
+            color: var(--deep-brown);
+            border: none;
+            border-radius: 8px;
+            padding: 14px 32px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn:hover {
+            background: var(--dark-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:focus {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .results {
+            text-align: center;
+        }
+
+        .results-title {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 24px;
+        }
+
+        .results-score {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 16px;
+        }
+
+        .results-message {
+            font-size: 1.25rem;
+            margin-bottom: 32px;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 48px;
+            font-size: 1.25rem;
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid var(--error);
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .option {
+                padding: 12px 16px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚔️ LOTR Character Height Quiz ⚔️</h1>
+            <p class="subtitle">Test your knowledge of Middle-earth's inhabitants</p>
+        </header>
+
+        <div id="loading" class="card loading">
+            <p>Loading characters from Middle-earth...</p>
+        </div>
+
+        <div id="error" class="card error hidden">
+            <p id="error-message"></p>
+            <div class="btn-container" style="margin-top: 24px;">
+                <button class="btn" onclick="location.reload()">Try Again</button>
+            </div>
+        </div>
+
+        <div id="quiz" class="hidden">
+            <div class="card">
+                <div class="score-board">
+                    <div class="score-item">
+                        <span class="score-label">Question</span>
+                        <span class="score-value"><span id="current-question">1</span>/<span id="total-questions">10</span></span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">Score</span>
+                        <span class="score-value" id="score">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">Streak</span>
+                        <span class="score-value" id="streak">0</span>
+                    </div>
+                </div>
+
+                <div class="question-section">
+                    <div class="question-number">Question <span id="question-num">1</span></div>
+                    <h2 class="question-text" id="question"></h2>
+                    <div id="character-info" class="character-info hidden"></div>
+                    <div class="options" id="options"></div>
+                    <div id="feedback" class="feedback"></div>
+                    <div class="btn-container">
+                        <button id="next-btn" class="btn hidden" onclick="nextQuestion()">Next Question</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="results" class="card hidden">
+            <div class="results">
+                <h2 class="results-title">Quest Complete!</h2>
+                <div class="results-score" id="final-score"></div>
+                <p class="results-message" id="results-message"></p>
+                <div class="btn-container">
+                    <button class="btn" onclick="restartQuiz()">Play Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quiz state
+        let characters = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let streak = 0;
+        let questions = [];
+        const TOTAL_QUESTIONS = 10;
+
+        // API configuration
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:3001' 
+            : '';
+
+        // Initialize quiz
+        async function init() {
+            try {
+                await loadCharacters();
+                generateQuestions();
+                startQuiz();
+            } catch (error) {
+                showError('Failed to load character data. Please try again.');
+                console.error(error);
+            }
+        }
+
+        // Load characters from API
+        async function loadCharacters() {
+            const response = await fetch(`${API_BASE}/v2/character?limit=1000`);
+            if (!response.ok) throw new Error('Failed to fetch characters');
+            
+            const data = await response.json();
+            
+            // Filter characters with valid height data
+            characters = data.docs.filter(char => {
+                if (!char.height) return false;
+                // Check if height contains numbers
+                return /\d/.test(char.height);
+            });
+
+            if (characters.length < 10) {
+                throw new Error('Not enough characters with height data');
+            }
+        }
+
+        // Parse height to centimeters for comparison
+        function parseHeight(heightStr) {
+            if (!heightStr) return null;
+            
+            // Extract numbers from various formats
+            const cmMatch = heightStr.match(/(\d+(?:\.\d+)?)\s*cm/i);
+            if (cmMatch) return parseFloat(cmMatch[1]);
+            
+            const mMatch = heightStr.match(/(\d+(?:\.\d+)?)\s*m(?!\w)/i);
+            if (mMatch) return parseFloat(mMatch[1]) * 100;
+            
+            const feetInchMatch = heightStr.match(/(\d+)'(\d+)/);
+            if (feetInchMatch) {
+                const feet = parseInt(feetInchMatch[1]);
+                const inches = parseInt(feetInchMatch[2]);
+                return (feet * 30.48) + (inches * 2.54);
+            }
+            
+            const feetMatch = heightStr.match(/(\d+(?:\.\d+)?)\s*(?:ft|feet)/i);
+            if (feetMatch) return parseFloat(feetMatch[1]) * 30.48;
+            
+            return null;
+        }
+
+        // Generate quiz questions
+        function generateQuestions() {
+            const questionTypes = ['compare', 'guess', 'tallest', 'shortest'];
+            questions = [];
+
+            for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+                const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+                let question;
+
+                switch (type) {
+                    case 'compare':
+                        question = generateCompareQuestion();
+                        break;
+                    case 'guess':
+                        question = generateGuessQuestion();
+                        break;
+                    case 'tallest':
+                        question = generateTallestQuestion();
+                        break;
+                    case 'shortest':
+                        question = generateShortestQuestion();
+                        break;
+                }
+
+                if (question) questions.push(question);
+            }
+
+            // Ensure we have enough questions
+            while (questions.length < TOTAL_QUESTIONS) {
+                const question = generateGuessQuestion();
+                if (question) questions.push(question);
+            }
+        }
+
+        // Generate comparison question
+        function generateCompareQuestion() {
+            const chars = getRandomCharacters(2);
+            if (!chars) return null;
+
+            const [char1, char2] = chars;
+            const height1 = parseHeight(char1.height);
+            const height2 = parseHeight(char2.height);
+
+            if (!height1 || !height2) return null;
+
+            const taller = height1 > height2 ? char1 : char2;
+            const shorter = height1 < height2 ? char1 : char2;
+
+            return {
+                question: `Who is taller?`,
+                options: [char1.name, char2.name],
+                correctAnswer: taller.name,
+                explanation: `${taller.name} (${taller.height}) is taller than ${shorter.name} (${shorter.height}).`,
+                characters: chars
+            };
+        }
+
+        // Generate guess question
+        function generateGuessQuestion() {
+            const char = getRandomCharacters(1)[0];
+            if (!char) return null;
+
+            const actualHeight = parseHeight(char.height);
+            if (!actualHeight) return null;
+
+            // Generate plausible wrong answers
+            const options = [char.height];
+            const variance = actualHeight * 0.3;
+
+            for (let i = 0; i < 3; i++) {
+                const offset = (Math.random() - 0.5) * variance * 2;
+                const wrongHeight = Math.round(actualHeight + offset);
+                const wrongHeightStr = `${wrongHeight}cm`;
+                if (!options.includes(wrongHeightStr)) {
+                    options.push(wrongHeightStr);
+                }
+            }
+
+            // Shuffle options
+            options.sort(() => Math.random() - 0.5);
+
+            return {
+                question: `How tall is ${char.name}?`,
+                options: options,
+                correctAnswer: char.height,
+                explanation: `${char.name} is ${char.height} tall.`,
+                character: char
+            };
+        }
+
+        // Generate tallest question
+        function generateTallestQuestion() {
+            const chars = getRandomCharacters(4);
+            if (!chars) return null;
+
+            const heights = chars.map(c => ({ char: c, height: parseHeight(c.height) }))
+                .filter(h => h.height !== null);
+
+            if (heights.length < 4) return null;
+
+            heights.sort((a, b) => b.height - a.height);
+            const tallest = heights[0].char;
+
+            return {
+                question: `Which of these characters is the tallest?`,
+                options: chars.map(c => c.name),
+                correctAnswer: tallest.name,
+                explanation: `${tallest.name} (${tallest.height}) is the tallest among these characters.`,
+                characters: chars
+            };
+        }
+
+        // Generate shortest question
+        function generateShortestQuestion() {
+            const chars = getRandomCharacters(4);
+            if (!chars) return null;
+
+            const heights = chars.map(c => ({ char: c, height: parseHeight(c.height) }))
+                .filter(h => h.height !== null);
+
+            if (heights.length < 4) return null;
+
+            heights.sort((a, b) => a.height - b.height);
+            const shortest = heights[0].char;
+
+            return {
+                question: `Which of these characters is the shortest?`,
+                options: chars.map(c => c.name),
+                correctAnswer: shortest.name,
+                explanation: `${shortest.name} (${shortest.height}) is the shortest among these characters.`,
+                characters: chars
+            };
+        }
+
+        // Get random characters
+        function getRandomCharacters(count) {
+            if (characters.length < count) return null;
+
+            const selected = [];
+            const available = [...characters];
+
+            for (let i = 0; i < count; i++) {
+                const index = Math.floor(Math.random() * available.length);
+                selected.push(available[index]);
+                available.splice(index, 1);
+            }
+
+            return selected;
+        }
+
+        // Start quiz
+        function startQuiz() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('quiz').classList.remove('hidden');
+            document.getElementById('total-questions').textContent = TOTAL_QUESTIONS;
+            showQuestion();
+        }
+
+        // Show current question
+        function showQuestion() {
+            const question = questions[currentQuestionIndex];
+            
+            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+            document.getElementById('question-num').textContent = currentQuestionIndex + 1;
+            document.getElementById('question').textContent = question.question;
+            
+            // Show character info if available
+            const charInfo = document.getElementById('character-info');
+            if (question.character) {
+                charInfo.innerHTML = `
+                    <div class="character-name">${question.character.name}</div>
+                    <div class="character-detail">Race: ${question.character.race}</div>
+                    ${question.character.realm ? `<div class="character-detail">Realm: ${question.character.realm}</div>` : ''}
+                `;
+                charInfo.classList.remove('hidden');
+            } else if (question.characters) {
+                charInfo.innerHTML = question.characters.map(c => `
+                    <div class="character-detail"><strong>${c.name}</strong> - ${c.race}</div>
+                `).join('');
+                charInfo.classList.remove('hidden');
+            } else {
+                charInfo.classList.add('hidden');
+            }
+
+            // Show options
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(option, button);
+                button.setAttribute('aria-label', `Option ${index + 1}: ${option}`);
+                optionsContainer.appendChild(button);
+            });
+
+            // Hide feedback and next button
+            document.getElementById('feedback').classList.remove('show', 'correct', 'incorrect');
+            document.getElementById('next-btn').classList.add('hidden');
+        }
+
+        // Handle answer selection
+        function selectAnswer(selected, button) {
+            const question = questions[currentQuestionIndex];
+            const isCorrect = selected === question.correctAnswer;
+            
+            // Disable all options
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.add('disabled');
+                opt.onclick = null;
+                
+                // Highlight correct and incorrect answers
+                if (opt.textContent === question.correctAnswer) {
+                    opt.classList.add('correct');
+                } else if (opt === button && !isCorrect) {
+                    opt.classList.add('incorrect');
+                }
+            });
+
+            // Update score and streak
+            if (isCorrect) {
+                score++;
+                streak++;
+                document.getElementById('score').textContent = score;
+                document.getElementById('streak').textContent = streak;
+            } else {
+                streak = 0;
+                document.getElementById('streak').textContent = streak;
+            }
+
+            // Show feedback
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = question.explanation;
+            feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+
+            // Show next button
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        // Move to next question
+        function nextQuestion() {
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < TOTAL_QUESTIONS) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // Show final results
+        function showResults() {
+            document.getElementById('quiz').classList.add('hidden');
+            document.getElementById('results').classList.remove('hidden');
+
+            const percentage = Math.round((score / TOTAL_QUESTIONS) * 100);
+            document.getElementById('final-score').textContent = `${score} / ${TOTAL_QUESTIONS}`;
+
+            let message = '';
+            if (percentage === 100) {
+                message = '🏆 Perfect! You are a true scholar of Middle-earth!';
+            } else if (percentage >= 80) {
+                message = '⚔️ Excellent! You know your way around Middle-earth!';
+            } else if (percentage >= 60) {
+                message = '🗡️ Well done! You have a good knowledge of the realm!';
+            } else if (percentage >= 40) {
+                message = '📚 Not bad! Keep exploring Middle-earth!';
+            } else {
+                message = '🌱 A journey of a thousand miles begins with a single step!';
+            }
+
+            document.getElementById('results-message').textContent = message;
+        }
+
+        // Restart quiz
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            streak = 0;
+            document.getElementById('score').textContent = score;
+            document.getElementById('streak').textContent = streak;
+            
+            generateQuestions();
+            
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('quiz').classList.remove('hidden');
+            
+            showQuestion();
+        }
+
+        // Show error
+        function showError(message) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error').classList.remove('hidden');
+        }
+
+        // Start the quiz when page loads
+        init();
+    </script>
+</body>
+</html>

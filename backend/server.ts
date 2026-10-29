@@ -28,6 +28,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
 app.use(express.static(path.join(__dirname, '/../__BUILD'))); // React build
+app.use('/quiz', express.static(path.join(__dirname, '/public'))); // Quiz game
 
 const server_port = process.env.PORT || 3001;
 
@@ -103,6 +104,11 @@ app.use((req, res, next) => {
 app.use('/v2/', apiLimiter);
 app.use('/v2', apiRoutes);
 app.use('/auth', authRoutes);
+
+// Serve quiz game
+app.get('/quiz', (req, res) => {
+	res.sendFile(path.join(__dirname + '/public/quiz.html'));
+});
 
 // Handles React frontend requests
 app.get('*', (req, res) => {
