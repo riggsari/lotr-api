@@ -18,6 +18,7 @@ const Headers: Record<string, string> = {
   "/documentation": "Documentation",
   "/login": "Login",
   "/account": "Account",
+  "/height-matching-game": "Height Matching Game",
 };
 
 const Header: React.FC = () => {
@@ -78,6 +79,8 @@ const Header: React.FC = () => {
           <Link to="/about">about</Link>
           <br />
           <Link to="/documentation">documentation</Link> <br />
+          <Link to="/height-matching-game">height matching game</Link>
+          <br />
           {userInfo && (
             <>
               <br /> <Link to="/account">account</Link>
