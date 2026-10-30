@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import backgroundImage from '../assets/lotr-bg.jpeg';
 
 interface Quote {
@@ -42,6 +42,7 @@ const WhoSaidIt: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {
