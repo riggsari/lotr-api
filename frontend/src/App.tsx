@@ -11,6 +11,7 @@ const Routes = [
   { path: '/account', component: Pages.Account },
   { path: '/sign-up', component: Pages.SignUp },
   { path: '/login', component: Pages.Login },
+  { path: '/who-said-it', component: Pages.WhoSaidIt },
   { path: '', component: Pages.NotFoundPage },
 ];
 
