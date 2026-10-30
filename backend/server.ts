@@ -110,11 +110,6 @@ app.get('/quiz', (req, res) => {
 	res.sendFile(path.join(__dirname + '/public/quiz.html'));
 });
 
-// Serve who-said-it game
-app.get('/who-said-it', (req, res) => {
-	res.sendFile(path.join(__dirname + '/public/who-said-it.html'));
-});
-
 // Handles React frontend requests
 app.get('*', (req, res) => {
 	res.sendFile(path.join(__dirname + '/../__BUILD/index.html'));
