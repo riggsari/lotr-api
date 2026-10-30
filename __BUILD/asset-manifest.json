@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/static/css/main.0b09db4f.css",
+    "main.js": "/static/js/main.91935801.js",
+    "static/media/lotr-bg.jpeg": "/static/media/lotr-bg.24e994b4fbd74f93b146.jpeg",
+    "index.html": "/index.html",
+    "main.0b09db4f.css.map": "/static/css/main.0b09db4f.css.map",
+    "main.91935801.js.map": "/static/js/main.91935801.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.0b09db4f.css",
+    "static/js/main.91935801.js"
+  ]
+}

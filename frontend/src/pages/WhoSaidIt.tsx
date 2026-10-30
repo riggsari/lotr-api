@@ -47,10 +47,15 @@ const WhoSaidIt: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
+      // Use local backend API
+      const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:3001'
+        : '';
+      
       const [quotesRes, charactersRes, moviesRes] = await Promise.all([
-        fetch('https://the-one-api.dev/v2/quote'),
-        fetch('https://the-one-api.dev/v2/character'),
-        fetch('https://the-one-api.dev/v2/movie')
+        fetch(`${API_BASE}/v2/quote?limit=1000`),
+        fetch(`${API_BASE}/v2/character?limit=1000`),
+        fetch(`${API_BASE}/v2/movie`)
       ]);
 
       const quotesData = await quotesRes.json();
