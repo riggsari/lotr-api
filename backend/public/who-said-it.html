@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Who Said It? - LOTR Quote Game</title>
+    <style>
+        :root {
+            --gold: #d4af37;
+            --dark-gold: #b8941f;
+            --deep-brown: #2c1810;
+            --medium-brown: #4a2c1a;
+            --light-brown: #8b6f47;
+            --cream: #f5e6d3;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --success: #4caf50;
+            --error: #f44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, var(--deep-brown) 0%, var(--medium-brown) 100%);
+            color: var(--cream);
+            min-height: 100vh;
+            padding: 24px;
+            line-height: 1.6;
+        }
+
+        @media (prefers-color-scheme: light) {
+            body {
+                background: linear-gradient(135deg, var(--cream) 0%, #e8d4b8 100%);
+                color: var(--deep-brown);
+            }
+            .card {
+                background: white;
+                box-shadow: 0 8px 32px rgba(44, 24, 16, 0.15);
+            }
+            .option {
+                background: var(--cream);
+                border-color: var(--light-brown);
+                color: var(--deep-brown);
+            }
+            .option:hover:not(.disabled) {
+                background: #ede0cc;
+                border-color: var(--gold);
+            }
+            .quote-box {
+                background: rgba(212, 175, 55, 0.1);
+                border-color: var(--gold);
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: var(--gold);
+            text-shadow: 2px 2px 4px var(--shadow);
+            margin-bottom: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            opacity: 0.9;
+            font-style: italic;
+        }
+
+        .card {
+            background: rgba(74, 44, 26, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 8px 32px var(--shadow);
+            margin-bottom: 24px;
+            border: 2px solid var(--gold);
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .score-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .score-label {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .score-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .question-section {
+            margin-bottom: 32px;
+        }
+
+        .question-number {
+            font-size: 0.875rem;
+            color: var(--gold);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .quote-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 3px solid var(--gold);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .quote-box::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            font-size: 4rem;
+            color: var(--gold);
+            line-height: 1;
+            opacity: 0.5;
+        }
+
+        .quote-text {
+            font-size: clamp(1.25rem, 3vw, 1.5rem);
+            font-style: italic;
+            margin-bottom: 16px;
+            padding-left: 20px;
+        }
+
+        .quote-context {
+            font-size: 0.9375rem;
+            opacity: 0.8;
+            padding-left: 20px;
+        }
+
+        .question-prompt {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            text-align: center;
+            color: var(--gold);
+        }
+
+        .options {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option {
+            background: rgba(139, 111, 71, 0.3);
+            border: 2px solid var(--light-brown);
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 1.125rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .option:hover:not(.disabled) {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--gold);
+            transform: translateX(4px);
+        }
+
+        .option:focus {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        .option.selected {
+            background: rgba(212, 175, 55, 0.3);
+            border-color: var(--gold);
+            font-weight: 600;
+        }
+
+        .option.correct {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .option.incorrect {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .character-info {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            border-left: 4px solid var(--gold);
+        }
+
+        .character-name {
+            font-size: 1.5rem;
+            color: var(--gold);
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .character-detail {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 6px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .character-detail strong {
+            color: var(--gold);
+            min-width: 80px;
+        }
+
+        .feedback {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 1rem;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid var(--success);
+        }
+
+        .feedback.incorrect {
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid var(--error);
+        }
+
+        .btn {
+            background: var(--gold);
+            color: var(--deep-brown);
+            border: none;
+            border-radius: 8px;
+            padding: 14px 32px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn:hover {
+            background: var(--dark-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:focus {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .results {
+            text-align: center;
+        }
+
+        .results-title {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 24px;
+        }
+
+        .results-score {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 16px;
+        }
+
+        .results-message {
+            font-size: 1.25rem;
+            margin-bottom: 32px;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 48px;
+            font-size: 1.25rem;
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid var(--error);
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .option {
+                padding: 12px 16px;
+                font-size: 1rem;
+            }
+
+            .quote-box {
+                padding: 20px;
+            }
+
+            .quote-text {
+                font-size: 1.125rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💬 Who Said It? 💬</h1>
+            <p class="subtitle">Guess the speaker of famous Lord of the Rings quotes</p>
+        </header>
+
+        <div id="loading" class="card loading">
+            <p>Loading quotes from Middle-earth...</p>
+        </div>
+
+        <div id="error" class="card error hidden">
+            <p id="error-message"></p>
+            <div class="btn-container" style="margin-top: 24px;">
+                <button class="btn" onclick="location.reload()">Try Again</button>
+            </div>
+        </div>
+
+        <div id="quiz" class="hidden">
+            <div class="card">
+                <div class="score-board">
+                    <div class="score-item">
+                        <span class="score-label">Question</span>
+                        <span class="score-value"><span id="current-question">1</span>/<span id="total-questions">10</span></span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">Score</span>
+                        <span class="score-value" id="score">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">Streak</span>
+                        <span class="score-value" id="streak">0</span>
+                    </div>
+                </div>
+
+                <div class="question-section">
+                    <div class="question-number">Question <span id="question-num">1</span></div>
+                    
+                    <div class="quote-box">
+                        <div class="quote-text" id="quote-text"></div>
+                        <div class="quote-context" id="quote-context"></div>
+                    </div>
+
+                    <div class="question-prompt">Who said this?</div>
+
+                    <div class="options" id="options"></div>
+                    
+                    <div id="character-info" class="character-info hidden"></div>
+                    
+                    <div id="feedback" class="feedback"></div>
+                    
+                    <div class="btn-container">
+                        <button id="next-btn" class="btn hidden" onclick="nextQuestion()">Next Question</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="results" class="card hidden">
+            <div class="results">
+                <h2 class="results-title">Quest Complete!</h2>
+                <div class="results-score" id="final-score"></div>
+                <p class="results-message" id="results-message"></p>
+                <div class="btn-container">
+                    <button class="btn" onclick="restartQuiz()">Play Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quiz state
+        let quotes = [];
+        let characters = [];
+        let movies = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let streak = 0;
+        let questions = [];
+        const TOTAL_QUESTIONS = 10;
+        const OPTIONS_PER_QUESTION = 4;
+
+        // API configuration
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:3001' 
+            : '';
+
+        // Initialize quiz
+        async function init() {
+            try {
+                await Promise.all([
+                    loadQuotes(),
+                    loadCharacters(),
+                    loadMovies()
+                ]);
+                generateQuestions();
+                startQuiz();
+            } catch (error) {
+                showError('Failed to load quote data. Please try again.');
+                console.error(error);
+            }
+        }
+
+        // Load quotes from API
+        async function loadQuotes() {
+            const response = await fetch(`${API_BASE}/v2/quote?limit=1000`);
+            if (!response.ok) throw new Error('Failed to fetch quotes');
+            
+            const data = await response.json();
+            
+            // Filter quotes that have a character and meaningful dialog
+            quotes = data.docs.filter(quote => 
+                quote.character && 
+                quote.dialog && 
+                quote.dialog.length > 10 &&
+                quote.dialog.length < 200 // Not too long for display
+            );
+
+            if (quotes.length < TOTAL_QUESTIONS) {
+                throw new Error('Not enough quotes with character data');
+            }
+        }
+
+        // Load characters from API
+        async function loadCharacters() {
+            const response = await fetch(`${API_BASE}/v2/character?limit=1000`);
+            if (!response.ok) throw new Error('Failed to fetch characters');
+            
+            const data = await response.json();
+            characters = data.docs;
+
+            if (characters.length < OPTIONS_PER_QUESTION) {
+                throw new Error('Not enough character data');
+            }
+        }
+
+        // Load movies from API
+        async function loadMovies() {
+            const response = await fetch(`${API_BASE}/v2/movie`);
+            if (!response.ok) throw new Error('Failed to fetch movies');
+            
+            const data = await response.json();
+            movies = data.docs;
+        }
+
+        // Get character by ID
+        function getCharacter(characterId) {
+            return characters.find(c => c._id === characterId);
+        }
+
+        // Get movie by ID
+        function getMovie(movieId) {
+            return movies.find(m => m._id === movieId);
+        }
+
+        // Generate quiz questions
+        function generateQuestions() {
+            // Shuffle quotes and take TOTAL_QUESTIONS
+            const shuffled = [...quotes].sort(() => Math.random() - 0.5);
+            const selectedQuotes = shuffled.slice(0, TOTAL_QUESTIONS);
+
+            questions = selectedQuotes.map(quote => {
+                const correctCharacter = getCharacter(quote.character);
+                if (!correctCharacter) return null;
+
+                // Get wrong answer options
+                const wrongCharacters = characters
+                    .filter(c => c._id !== quote.character && c.name)
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, OPTIONS_PER_QUESTION - 1);
+
+                // Combine and shuffle options
+                const options = [correctCharacter, ...wrongCharacters]
+                    .sort(() => Math.random() - 0.5);
+
+                return {
+                    quote: quote,
+                    correctCharacter: correctCharacter,
+                    options: options,
+                    movie: getMovie(quote.movie)
+                };
+            }).filter(q => q !== null);
+
+            // Ensure we have enough valid questions
+            if (questions.length < TOTAL_QUESTIONS) {
+                throw new Error('Could not generate enough valid questions');
+            }
+        }
+
+        // Start the quiz
+        function startQuiz() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('quiz').classList.remove('hidden');
+            document.getElementById('total-questions').textContent = TOTAL_QUESTIONS;
+            showQuestion();
+        }
+
+        // Show current question
+        function showQuestion() {
+            const question = questions[currentQuestionIndex];
+            
+            // Update question number
+            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+            document.getElementById('question-num').textContent = currentQuestionIndex + 1;
+
+            // Display quote
+            document.getElementById('quote-text').textContent = question.quote.dialog;
+            
+            // Display movie context
+            const movieName = question.movie ? question.movie.name : 'Unknown movie';
+            document.getElementById('quote-context').textContent = `From: ${movieName}`;
+
+            // Clear previous state
+            document.getElementById('character-info').classList.add('hidden');
+            document.getElementById('feedback').classList.remove('show');
+            document.getElementById('next-btn').classList.add('hidden');
+
+            // Create option buttons
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach((character, index) => {
+                const button = document.createElement('button');
+                button.className = 'option';
+                button.textContent = character.name;
+                button.setAttribute('role', 'button');
+                button.setAttribute('tabindex', '0');
+                button.onclick = () => selectAnswer(character._id);
+                button.onkeypress = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        selectAnswer(character._id);
+                    }
+                };
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // Handle answer selection
+        function selectAnswer(selectedCharacterId) {
+            const question = questions[currentQuestionIndex];
+            const options = document.querySelectorAll('.option');
+            const isCorrect = selectedCharacterId === question.correctCharacter._id;
+
+            // Disable all options
+            options.forEach(option => {
+                option.classList.add('disabled');
+                const optionText = option.textContent;
+                const optionCharacter = question.options.find(c => c.name === optionText);
+                
+                if (optionCharacter._id === question.correctCharacter._id) {
+                    option.classList.add('correct');
+                } else if (optionCharacter._id === selectedCharacterId) {
+                    option.classList.add('incorrect');
+                }
+            });
+
+            // Update score and streak
+            if (isCorrect) {
+                score++;
+                streak++;
+                showFeedback(true, 'Correct! Well done!');
+            } else {
+                streak = 0;
+                showFeedback(false, `Incorrect. The correct answer was ${question.correctCharacter.name}.`);
+            }
+
+            // Update score display
+            document.getElementById('score').textContent = score;
+            document.getElementById('streak').textContent = streak;
+
+            // Show character information
+            showCharacterInfo(question.correctCharacter);
+
+            // Show next button
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        // Show character information
+        function showCharacterInfo(character) {
+            const infoContainer = document.getElementById('character-info');
+            
+            let html = `<div class="character-name">${character.name}</div>`;
+            
+            if (character.race) {
+                html += `<div class="character-detail"><strong>Race:</strong> <span>${character.race}</span></div>`;
+            }
+            if (character.realm) {
+                html += `<div class="character-detail"><strong>Realm:</strong> <span>${character.realm}</span></div>`;
+            }
+            if (character.birth) {
+                html += `<div class="character-detail"><strong>Birth:</strong> <span>${character.birth}</span></div>`;
+            }
+            if (character.gender) {
+                html += `<div class="character-detail"><strong>Gender:</strong> <span>${character.gender}</span></div>`;
+            }
+
+            infoContainer.innerHTML = html;
+            infoContainer.classList.remove('hidden');
+        }
+
+        // Show feedback message
+        function showFeedback(isCorrect, message) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = 'feedback show ' + (isCorrect ? 'correct' : 'incorrect');
+        }
+
+        // Move to next question
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < TOTAL_QUESTIONS) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // Show final results
+        function showResults() {
+            document.getElementById('quiz').classList.add('hidden');
+            document.getElementById('results').classList.remove('hidden');
+
+            const percentage = Math.round((score / TOTAL_QUESTIONS) * 100);
+            document.getElementById('final-score').textContent = `${score} / ${TOTAL_QUESTIONS}`;
+
+            let message = '';
+            if (percentage === 100) {
+                message = '🏆 Perfect! You are a true scholar of Middle-earth!';
+            } else if (percentage >= 80) {
+                message = '⭐ Excellent! You know your quotes well!';
+            } else if (percentage >= 60) {
+                message = '👍 Good job! You have a solid knowledge of LOTR quotes.';
+            } else if (percentage >= 40) {
+                message = '📚 Not bad! Time to revisit the tales of Middle-earth.';
+            } else {
+                message = '🎬 Keep watching! There\'s much to learn about Middle-earth.';
+            }
+
+            document.getElementById('results-message').textContent = message;
+        }
+
+        // Restart quiz
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            streak = 0;
+            
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('score').textContent = '0';
+            document.getElementById('streak').textContent = '0';
+            
+            generateQuestions();
+            startQuiz();
+        }
+
+        // Show error message
+        function showError(message) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.remove('hidden');
+            document.getElementById('error-message').textContent = message;
+        }
+
+        // Start the quiz when page loads
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
