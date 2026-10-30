@@ -23,28 +23,36 @@ const App: React.FC<AppProps> = ({ tab }) => {
   return (
     <Router>
       <div className="App">
-        <div className="container">
-          <div id="content-wrap">
-            <Header />
-            <div
-              style={{
-                padding: "20px",
-                display: "flex",
-                justifyContent: "center",
-              }}
-              className="row"
-            >
-              <div className="col-sm-12 col-lg-6">
-                <Switch>
-                  {Routes.map((route, i) => (
-                    <Route exact path={route.path} key={i} component={route.component} />
-                  ))}
-                </Switch>
+        <Switch>
+          {/* Full-page routes without header/footer/container */}
+          <Route exact path="/who-said-it" component={Pages.WhoSaidIt} />
+          
+          {/* Standard routes with header/footer/container */}
+          <Route>
+            <div className="container">
+              <div id="content-wrap">
+                <Header />
+                <div
+                  style={{
+                    padding: "20px",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                  className="row"
+                >
+                  <div className="col-sm-12 col-lg-6">
+                    <Switch>
+                      {Routes.filter(r => r.path !== '/who-said-it').map((route, i) => (
+                        <Route exact path={route.path} key={i} component={route.component} />
+                      ))}
+                    </Switch>
+                  </div>
+                </div>
               </div>
+              <Footer />
             </div>
-          </div>
-          <Footer />
-        </div>
+          </Route>
+        </Switch>
       </div>
     </Router>
   );
